@@ -23,9 +23,9 @@ import * as request from 'superagent';
 import { Message, MessageEmbed } from 'discord.js';
 
 import { Command } from 'discord-akairo';
-import Constants from '../../../utils/Constants';
 import moment from 'moment';
 import numeral from 'numeral';
+import Constants from '../../../utils/Constants';
 
 export default class LastFMCommand extends Command {
   public constructor() {
@@ -58,7 +58,8 @@ export default class LastFMCommand extends Command {
       errorEmbed.setColor(0xFF0000);
       errorEmbed.setDescription(
         'No last.fm member username was given. Please enter one and then '
-        + 'try again!');
+        + 'try again!',
+      );
 
       return message.channel.send(errorEmbed);
     }
@@ -70,13 +71,13 @@ export default class LastFMCommand extends Command {
     const lovedTracks = 'user.getLovedTracks';
 
     await request.get(lastfmBase + recentTracks + lastfmQuery).then(async (res) => {
-      const track = res.body.recenttracks.track[0];
-      const trackName = track.name;
-      const trackArtist = track.artist['#text'];
-      const trackAlbum = track.album['#text'];
+      const result = res.body.recenttracks.track[0];
+      const trackName = result.name;
+      const trackArtist = result.artist['#text'];
+      const trackAlbum = result.album['#text'];
 
       let playbackState: string;
-      if (track.hasOwnProperty('@attr')) {
+      if (Object.prototype.hasOwnProperty.call(result, '@attr')) {
         playbackState = 'is currently listening to';
       } else {
         playbackState = 'last listened to';
@@ -84,15 +85,14 @@ export default class LastFMCommand extends Command {
 
       const userRequest = await request.get(lastfmBase + userInfo + lastfmQuery);
       const userLovedTracksRequest = await request.get(lastfmBase + lovedTracks + lastfmQuery);
-      const user = userRequest.body.user;
+      const { user } = userRequest.body;
       const userName = user.name;
       const userUrl = user.url;
       const userPlayCount = numeral(user.playcount).format('0,0');
       const userCountry = user.country;
       const userJoinDate = moment.unix(user.registered.unixtime).format(Constants.DATE_FORMAT);
       const userLovedTracks = userLovedTracksRequest.body.lovedtracks['@attr'].total;
-      const userInformation =
-        `**Scrobbles**: ${userPlayCount}\n`
+      const userInformation = `**Scrobbles**: ${userPlayCount}\n`
         + `**Loved Tracks**: ${userLovedTracks}\n`
         + `**Country**: ${userCountry}\n`
         + `**Join Date**: ${userJoinDate}`;
@@ -101,50 +101,46 @@ export default class LastFMCommand extends Command {
       const userRecentlyPlayed = await res.body.recenttracks.track.map((track: {
         name: string, artist: string, date: any,
       }) => {
-
         /** The song's name. */
-        const name = track.name;
+        const { name } = track;
         /** The song's artist. */
         const artist = track.artist['#text'];
         /** The song's playback state. */
         let nowPlaying: string;
 
-        if (track.hasOwnProperty('@attr')) {
-          nowPlaying = '\:arrow_forward:';
+        if (Object.prototype.hasOwnProperty.call(track, '@attr')) {
+          nowPlaying = '\x5c▶️';
         } else {
           nowPlaying = '';
         }
 
         /** Return the track name and the artist. */
         return `${nowPlaying} **${name}** — ${artist} `;
-
       }).join('\n');
 
       lastfmEmbed.setTitle(`${userName}'s Last.fm`);
       lastfmEmbed.setURL(userUrl);
       lastfmEmbed.setColor(0xd51007);
       lastfmEmbed.setDescription(
-        `${userName} ${playbackState} ${trackName} by ${trackArtist} on ${trackAlbum}.\n\n`
-        + '**__User Information:__**\n' + userInformation + '\n\n'
-        + '**__Recently Played:__**\n' + userRecentlyPlayed,
+        `${`${userName} ${playbackState} ${trackName} by ${trackArtist} on ${trackAlbum}.\n\n`
+        + '**__User Information:__**\n'}${userInformation}\n\n`
+        + `**__Recently Played:__**\n${userRecentlyPlayed}`,
       );
       lastfmEmbed.setFooter('Powered by the Last.fm API.');
 
       this.client.spotify.clientCredentialsGrant().then((data) => {
-        this.client.spotify.setAccessToken(data.body['access_token']);
-        this.client.spotify.searchTracks(`${trackName} ${trackArtist}`, { limit: 1 }).then((res) => {
-
-          if (res.body.tracks.items.length === 0) {
+        this.client.spotify.setAccessToken(data.body.access_token);
+        this.client.spotify.searchTracks(`${trackName} ${trackArtist}`, { limit: 1 }).then((resp) => {
+          if (resp.body.tracks.items.length === 0) {
             this.client.logger.info('Cannot find anything on Spotify for this track.');
           } else {
-            lastfmEmbed.setThumbnail(res.body.tracks.items[0].album.images[1].url);
+            lastfmEmbed.setThumbnail(resp.body.tracks.items[0].album.images[1].url);
           }
 
           return message.channel.send(lastfmEmbed);
         });
       });
     }).catch((err) => {
-
       // Return a message if the Last.fm API
       // responds with a 404 Not Found error.
       if (err.status === 404) {
@@ -161,8 +157,10 @@ export default class LastFMCommand extends Command {
         return message.channel.send('Sorry, it looks like the last.fm API is currently offline. Please try again later!');
       }
 
-      console.log(err);
+      this.client.logger.error(err);
       return message.channel.send('Sorry! Looks like I encountered an error. Please try again later.');
     });
+
+    return null;
   }
 }

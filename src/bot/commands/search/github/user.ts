@@ -49,9 +49,9 @@ export default class GitHubUserCommand extends Command {
     if (!user) {
       GITHUB_ERROR_EMBED.setTitle('Error: No username provided.');
       GITHUB_ERROR_EMBED.setDescription(
-        'You did not provide the username of the user you would ' +
-        'like to get information on. Please provide one, and then try again.\n\n' +
-        '**Examples**: nat, afollestad',
+        'You did not provide the username of the user you would '
+        + 'like to get information on. Please provide one, and then try again.\n\n'
+        + '**Examples**: nat, afollestad',
       );
       return message.channel.send(GITHUB_ERROR_EMBED);
     }
@@ -111,21 +111,22 @@ export default class GitHubUserCommand extends Command {
     GITHUB_EMBED.setThumbnail(GH_USER_AVATAR);
     GITHUB_EMBED.setURL(GH_USER_URL);
     GITHUB_EMBED.setDescription(
-      `${GH_USER_BIOGRAPHY}\n\n` +
-      '**__Basic Details__**:\n' +
-      `**Status**: ${GH_USER_STATUS}\n` +
-      `**Joined**: ${GH_USER_JOIN_DATE}\n` +
-      `**Repositories**: ${GH_USER_REPOSITORIES}\n` +
-      `**Location**: ${GH_USER_LOCATION}\n` +
-      `**Following**: ${GH_USER_FOLLOWING}\n` +
-      `**Followers**: ${GH_USER_FOLLOWERS}\n` +
-      `**Website**: ${GH_USER_WEBSITE}\n` +
-      `**Company**: ${GH_USER_COMPANY}\n\n` +
-      '**__Other Details__**:\n' +
-      `**Bounty Hunter**: ${GH_USER_BUG_BOUNTY}\n` +
-      `**Campus Expert**: ${GH_USER_CAMPUS_EXPERT}\n` +
-      `**Developer Program Member**: ${GH_USER_DEV_PROGRAM_MEMBER}\n` +
-      `**GitHub Employee**: ${GH_USER_EMPLOYEE}`);
+      `${GH_USER_BIOGRAPHY}\n\n`
+      + '**__Basic Details__**:\n'
+      + `**Status**: ${GH_USER_STATUS}\n`
+      + `**Joined**: ${GH_USER_JOIN_DATE}\n`
+      + `**Repositories**: ${GH_USER_REPOSITORIES}\n`
+      + `**Location**: ${GH_USER_LOCATION}\n`
+      + `**Following**: ${GH_USER_FOLLOWING}\n`
+      + `**Followers**: ${GH_USER_FOLLOWERS}\n`
+      + `**Website**: ${GH_USER_WEBSITE}\n`
+      + `**Company**: ${GH_USER_COMPANY}\n\n`
+      + '**__Other Details__**:\n'
+      + `**Bounty Hunter**: ${GH_USER_BUG_BOUNTY}\n`
+      + `**Campus Expert**: ${GH_USER_CAMPUS_EXPERT}\n`
+      + `**Developer Program Member**: ${GH_USER_DEV_PROGRAM_MEMBER}\n`
+      + `**GitHub Employee**: ${GH_USER_EMPLOYEE}`,
+    );
     GITHUB_EMBED.setFooter('Powered by the GitHub GraphQL API.');
     GITHUB_EMBED.setTimestamp();
 

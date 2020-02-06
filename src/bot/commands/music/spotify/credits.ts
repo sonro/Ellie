@@ -42,22 +42,21 @@ export default class SpotifyCreditsCommand extends Command {
     });
   }
 
-  public async exec(message: Message, { track }: { track: string }) {
-
-    if (!track) {
+  public async exec(message: Message, { track: query }: { track: string }) {
+    if (!query) {
       return message.channel.send("You didn't input a track to get credits for. Please try again.");
     }
 
     this.client.spotify.clientCredentialsGrant().then((data) => {
-      this.client.spotify.setAccessToken(data.body['access_token']);
-      this.client.spotify.searchTracks(track, { limit: 1, offset: 0 }, async (err, res) => {
+      this.client.spotify.setAccessToken(data.body.access_token);
+      this.client.spotify.searchTracks(query, { limit: 1, offset: 0 }, async (err, res) => {
         const embed = new MessageEmbed();
 
         try {
           const track = res.body.tracks.items[0];
           const parent = track.album;
-          const id = track.id;
-          const name = track.name;
+          const { id } = track;
+          const { name } = track;
           const link = track.external_urls.spotify;
           const cover = parent.images[1].url;
 
@@ -67,7 +66,7 @@ export default class SpotifyCreditsCommand extends Command {
           const url = await request.get('https://open.spotify.com').set({ 'User-Agent': agent });
           const token = url.header['set-cookie'][3].split('=')[1].split(';')[0];
 
-          const credits = await request.get(endpoint).set({ Authorization: 'Bearer ' + token, 'User-Agent': agent });
+          const credits = await request.get(endpoint).set({ Authorization: `Bearer ${token}`, 'User-Agent': agent });
           const performers = credits.body.roleCredits[0].artists.map((a: any) => a.name).join('\n');
           const writers = credits.body.roleCredits[1].artists.map((a: any) => a.name).join('\n');
           const producers = credits.body.roleCredits[2].artists.map((a: any) => a.name).join('\n');
@@ -78,21 +77,22 @@ export default class SpotifyCreditsCommand extends Command {
           embed.setURL(link);
           embed.setColor(0x1DB954);
           embed.setDescription(
-            '**Performed by**:\n' +
-            `${performers}\n\n` +
-            '**Written by**:\n' +
-            `${writers}\n\n` +
-            '**Produced by**:\n' +
-            `${producers}`,
+            '**Performed by**:\n'
+            + `${performers}\n\n`
+            + '**Written by**:\n'
+            + `${writers}\n\n`
+            + '**Produced by**:\n'
+            + `${producers}`,
           );
           embed.setFooter(`Credits provided by ${source}.`);
 
           return message.channel.send(embed);
         } catch (error) {
-          console.log(error.request);
-          console.log(error.message);
+          return null;
         }
       });
     });
+
+    return null;
   }
 }

@@ -21,7 +21,7 @@ import { Message, MessageEmbed } from 'discord.js';
 
 import { Command } from 'discord-akairo';
 import Pokedex from 'pokedex-promise-v2';
-import { Util } from '../../../utils/Util';
+import Util from '../../../utils/Util';
 
 export default class PokemonCommand extends Command {
   public constructor() {
@@ -42,66 +42,63 @@ export default class PokemonCommand extends Command {
   }
 
   public async exec(message: Message, { pokemon }: { pokemon: string }) {
-    const POKE_ENDPOINT = new Pokedex();
-    const POKEMON_LOWERCASE = pokemon.toLowerCase();
-    const POKEMON_MAIN_API = `api/v2/pokemon/${POKEMON_LOWERCASE}`;
-    const POKEMON_SPECIES_API = `api/v2/pokemon-species/${POKEMON_LOWERCASE}`;
+    const endpoint = new Pokedex();
+    const pokemonLowercase = pokemon.toLowerCase();
+    const mainApi = `api/v2/pokemon/${pokemonLowercase}`;
+    const speciesApi = `api/v2/pokemon-species/${pokemonLowercase}`;
 
-    POKE_ENDPOINT.resource([POKEMON_MAIN_API, POKEMON_SPECIES_API]).then((res) => {
-      const POKEMON_EMBED = new MessageEmbed();
-      const POKEMON_NAME = res[0].name.replace(/^\w/, (c: string) => c.toUpperCase());
-      const BULBAPEDIA_URL = `https://bulbapedia.bulbagarden.net/wiki/${POKEMON_NAME}`;
-      const POKEMON_HEIGHT = '**Height**: ' + res[0].height / 10 + 'm';
-      const POKEMON_WEIGHT = '**Weight**: ' + res[0].weight / 10 + 'kg';
+    endpoint.resource([mainApi, speciesApi]).then((res) => {
+      const embed = new MessageEmbed();
+      const name = res[0].name.replace(/^\w/, (c: string) => c.toUpperCase());
+      const bulbapediaUrl = `https://bulbapedia.bulbagarden.net/wiki/${name}`;
+      const height = `**Height**: ${res[0].height / 10}m`;
+      const weight = `**Weight**: ${res[0].weight / 10}kg`;
       // This is not the best looking code in existence, but it gets the job done nicely.
-      const POKEMON_ABILITIES = '**Abilities**: ' + res[0].abilities.map((ability: any) => {
-        return Util.convertToTitleCase(ability.ability.name).replace('-', ' ');
-      }).join(', ');
+      const abilities = `**Abilities**: ${res[0].abilities.map((a: any) => Util.convertToTitleCase(a.ability.name).replace('-', ' ')).join(', ')}`;
 
-      let POKEMON_FLAVOR_TEXT: string;
-      let POKEMON_TYPE: string;
-      let POKEMON_ID = JSON.stringify(res[1].id);
+      let flavorText: string;
+      let type: string;
+      let id = JSON.stringify(res[1].id);
 
       if (res[1].flavor_text_entries[1].language.name === 'en') {
-        POKEMON_FLAVOR_TEXT = res[1].flavor_text_entries[1].flavor_text;
+        flavorText = res[1].flavor_text_entries[1].flavor_text;
       } else {
-        POKEMON_FLAVOR_TEXT = res[1].flavor_text_entries[2].flavor_text;
+        flavorText = res[1].flavor_text_entries[2].flavor_text;
       }
 
-      if (POKEMON_ID.length === 2) {
-        POKEMON_ID = `0${res[1].id}`;
-      } else if (POKEMON_ID.length === 1) {
-        POKEMON_ID = `00${res[1].id}`;
+      if (id.length === 2) {
+        id = `0${res[1].id}`;
+      } else if (id.length === 1) {
+        id = `00${res[1].id}`;
       } else {
-        POKEMON_ID = res[1].id;
+        id = res[1].id;
       }
 
-      const POKEMON_THUMBNAIL = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${POKEMON_ID}.png`;
+      const thumbnail = `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${id}.png`;
 
       if (typeof res[0].types[1] !== 'undefined') {
-        POKEMON_TYPE = `**Types**: ${res[0].types[1].type.name.replace(/^\w/, (c: string) => c.toUpperCase())} ` +
-          `and ${res[0].types[0].type.name.replace(/^\w/, (c: string) => c.toUpperCase())}`;
+        type = `**Types**: ${res[0].types[1].type.name.replace(/^\w/, (c: string) => c.toUpperCase())} `
+          + `and ${res[0].types[0].type.name.replace(/^\w/, (c: string) => c.toUpperCase())}`;
       } else {
-        POKEMON_TYPE = `**Type**: ${res[0].types[0].type.name.replace(/^\w/, (c: string) => c.toUpperCase())}`;
+        type = `**Type**: ${res[0].types[0].type.name.replace(/^\w/, (c: string) => c.toUpperCase())}`;
       }
 
-      POKEMON_EMBED.setTitle(POKEMON_NAME);
-      POKEMON_EMBED.setColor(0xFFCB05);
-      POKEMON_EMBED.setThumbnail(POKEMON_THUMBNAIL);
-      POKEMON_EMBED.setDescription(
-        `${POKEMON_TYPE}\n`
-        + `${POKEMON_HEIGHT}\n`
-        + `${POKEMON_WEIGHT}\n`
-        + `${POKEMON_ABILITIES}\n\n`
-        + `${POKEMON_FLAVOR_TEXT}\n\n`
-        + `More information about **${POKEMON_NAME}** is available on [Bulbapedia](${BULBAPEDIA_URL}).`,
+      embed.setTitle(name);
+      embed.setColor(0xFFCB05);
+      embed.setThumbnail(thumbnail);
+      embed.setDescription(
+        `${type}\n`
+        + `${height}\n`
+        + `${weight}\n`
+        + `${abilities}\n\n`
+        + `${flavorText}\n\n`
+        + `More information about **${name}** is available on [Bulbapedia](${bulbapediaUrl}).`,
       );
-      POKEMON_EMBED.setFooter(`Pokédex entry ${POKEMON_ID} | Powered by PokéAPI.`);
+      embed.setFooter(`Pokédex entry ${id} | Powered by PokéAPI.`);
 
-      message.channel.send(POKEMON_EMBED);
-
+      return message.channel.send(embed);
     }).catch((err) => {
-      console.log(err);
+      this.client.logger.error(err);
     });
   }
 }

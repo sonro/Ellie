@@ -27,8 +27,8 @@ export default class PingCommand extends Command {
     super('ping', {
       aliases: ['ping'],
       description: {
-        content: 'Checks Erica\'s response to the Discord API ' +
-          'and checks the message latency.',
+        content: 'Checks Erica\'s response to the Discord API '
+          + 'and checks the message latency.',
       },
       category: 'Utilities',
       ratelimit: 2,
@@ -44,9 +44,10 @@ export default class PingCommand extends Command {
     pingEmbed.setColor(0x8b0000);
     pingEmbed.setTitle('Latency Information');
     pingEmbed.setDescription(
-      'Pong! :ping_pong:\n\n' +
-      `**Message Latency**: \`${msgLatency}ms\`\n` +
-      `**API Latency**: \`${apiLatency}ms\``);
+      'Pong! :ping_pong:\n\n'
+      + `**Message Latency**: \`${msgLatency}ms\`\n`
+      + `**API Latency**: \`${apiLatency}ms\``,
+    );
 
     msg.edit({ content: null, embed: pingEmbed });
   }

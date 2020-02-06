@@ -20,10 +20,10 @@
 
 import { Command } from 'discord-akairo';
 import { Message, MessageEmbed } from 'discord.js';
+import pluralize from 'pluralize';
 
 const moment = require('moment');
 require('moment-duration-format');
-import pluralize from 'pluralize';
 
 export default class SpotifyAlbumCommand extends Command {
   public constructor() {
@@ -64,17 +64,16 @@ export default class SpotifyAlbumCommand extends Command {
     }
 
     this.client.spotify.clientCredentialsGrant().then((data) => {
-      this.client.spotify.setAccessToken(data.body['access_token']);
+      this.client.spotify.setAccessToken(data.body.access_token);
       this.client.spotify.searchAlbums(album, { market, limit: 1, offset: 0 }).then((resp) => {
-
-        const id = resp.body.albums.items[0].id;
+        const { id } = resp.body.albums.items[0];
 
         this.client.spotify.getAlbum(id).then((res) => {
-          const name = res.body.name;
+          const { name: trackName } = res.body;
           const image = res.body.images[0].url;
           const count = pluralize('track', res.body.tracks.total, true);
           const link = res.body.external_urls.spotify;
-          const artists = res.body.artists.map(a => `[${a.name}](${a.external_urls.spotify})`).join(', ');
+          const artists = res.body.artists.map((a) => `[${a.name}](${a.external_urls.spotify})`).join(', ');
           const released = moment(res.body.release_date).format('LL');
 
           let copyright: string;
@@ -85,23 +84,23 @@ export default class SpotifyAlbumCommand extends Command {
           }
 
           const tracklist = res.body.tracks.items.map((track) => {
-            const name = track.name;
+            const { name } = track;
             const number = track.track_number;
-            const link = track.external_urls.spotify;
+            const url = track.external_urls.spotify;
             const length = moment.duration(track.duration_ms, 'milliseconds').format();
             const explicit = track.explicit ? ' — Explicit' : '';
-            return `**${number}.** [${name}](${link}) ${explicit} — ${length}`;
+            return `**${number}.** [${name}](${url}) ${explicit} — ${length}`;
           }).join('\n');
 
-          embed.setTitle(name);
+          embed.setTitle(trackName);
           embed.setURL(link);
           embed.setThumbnail(image);
           embed.setDescription(
-            `**Artist(s)**: ${artists}\n` +
-            `**Release Date**: ${released}\n` +
-            `**Tracks**: ${count}\n\n` +
-            '**Tracklist**:\n' +
-            `${tracklist}\n\n`,
+            `**Artist(s)**: ${artists}\n`
+            + `**Release Date**: ${released}\n`
+            + `**Tracks**: ${count}\n\n`
+            + '**Tracklist**:\n'
+            + `${tracklist}\n\n`,
           );
           embed.setFooter(`${copyright} | Powered by the Spotify API.`);
 
@@ -113,25 +112,26 @@ export default class SpotifyAlbumCommand extends Command {
           // too.
           if (embed.length >= 2048) {
             error.setTitle('Error: Album tracklist too big.');
-            error.setDescription('Unfortunately, it looks like this album\'s tracklist is too ' +
-              'big to display. Please try a different album.');
+            error.setDescription('Unfortunately, it looks like this album\'s tracklist is too '
+              + 'big to display. Please try a different album.');
             message.channel.send(error);
           } else {
             message.channel.send(embed);
           }
         }).catch((err) => {
-          console.log(err);
+          this.client.logger.error(err);
         });
       }).catch((err) => {
         if (err.name === 'TypeError') {
           error.setTitle('Error: Invalid album name provided.');
-          error.setDescription('You did not provide a valid album name. Please ' +
-            'provide one and then try again.');
+          error.setDescription('You did not provide a valid album name. Please '
+            + 'provide one and then try again.');
           message.channel.send(error);
         } else {
-          console.log(err);
+          this.client.logger.error(err);
         }
       });
     });
+    return null;
   }
 }

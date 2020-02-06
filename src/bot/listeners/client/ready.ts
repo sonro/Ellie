@@ -34,7 +34,6 @@ export default class ReadyListener extends Listener {
   }
 
   public async exec() {
-
     this.client.logger.info(
       `Ellie v${version} has successfully logged into the Discord API as ${this.client.user!.tag} and `
       + `is connected to ${this.client.guilds.size} guild(s).`,
@@ -50,15 +49,13 @@ export default class ReadyListener extends Listener {
 
       const activity = activities[Math.floor(Math.random() * activities.length)];
 
-      if (activity.name === this.client.user!.presence.activity!.name) {
+      if (activity.name === this.client.user!.presence.activities[0].name) {
         this.client.logger.info('Activity is identical, leaving activity the same for now.');
       } else {
         this.client.user!.setActivity(activity.name, { type: activity.type });
 
         this.client.logger.info(`Successfully changed the activity! New activity is "${activity.type} ${activity.name}".`);
       }
-
     }, 200000); // tslint:disable-line: align
-
   }
 }

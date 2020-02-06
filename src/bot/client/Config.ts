@@ -51,22 +51,31 @@ type Configuration = {
 export default class Config {
   /** The command prefix used for invoking commands. */
   readonly prefix: string;
+
   /** The bot's owner. Used for commands that should be owner-only. */
   readonly owner: string;
+
   /** The Discord API token to use, used for connecting to the Discord API. */
   readonly token: string;
+
   /** The database credentials to use. */
   readonly database: { type: any, name: string };
+
   /** The LastFM API key to use. */
   readonly lastfm: string;
+
   /** The Spotify client ID, client secret, and wgAccessToken to use. */
   readonly spotify: { clientID: string, clientSecret: string };
+
   /** The Google API key to use. */
   readonly google: string;
+
   /** The GitHub authentication token and repository. */
   readonly github: { token: string, repo_owner: string, repo_name: string };
+
   /** The Dark Sky API key to use. */
   readonly darksky: { key: string };
+
   /** The Nexus Mods API key to use. */
   readonly nexusmods: string;
 
@@ -99,7 +108,7 @@ export default class Config {
   }
 
   /** Loads the bot's configuration from a configuration file. */
-  static loadConfig(path: string = configFile): Config {
-    return new Config(fs.readFileSync(path, 'utf8'));
+  static loadConfig(file: string = configFile): Config {
+    return new Config(fs.readFileSync(file, 'utf8'));
   }
 }

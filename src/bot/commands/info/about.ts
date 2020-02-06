@@ -20,10 +20,10 @@
 
 import { Command, version as akairo } from 'discord-akairo';
 import { Message, MessageEmbed, version as discord } from 'discord.js';
-import { Util } from '../../utils/Util';
 import moment from 'moment';
 import pluralize from 'pluralize';
 import { version as typescript } from 'typescript';
+import Util from '../../utils/Util';
 
 import * as pjson from '../../../../package.json';
 
@@ -40,20 +40,22 @@ export default class AboutCommand extends Command {
 
   public async exec(message: Message) {
     const embed = new MessageEmbed();
+
     // Bot Information
-    const version = pjson.version;
-    const codename = pjson.codename;
+    const { version } = pjson;
+    const { codename } = pjson;
     const ownerID = this.client.ownerID as string;
     const owner = this.client.users.get(ownerID)!.tag;
     const memory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const uptime = moment.duration(-this.client.uptime!, 'milliseconds').humanize(true);
     const node = Util.parseNodeVersion(process.version);
-    const v8 = process.versions.v8;
+    const { v8 } = process.versions;
+
     // Statistics
-    const filter = this.client.channels.filter(channel => channel.type !== 'category').size;
+    const filter = this.client.channels.filter((channel) => channel.type !== 'category').size;
     const channels = pluralize('channel', filter, true);
     const guilds = pluralize('guild', this.client.guilds.size, true);
-    const users = pluralize('user', this.client.guilds.map(g => g.memberCount).reduce((f, l) => f + l), true);
+    const users = pluralize('user', this.client.guilds.map((g) => g.memberCount).reduce((f, l) => f + l), true);
 
     embed.setTitle(`About ${this.client.user!.username}`);
     embed.setColor(0x00AE86);
@@ -79,6 +81,6 @@ export default class AboutCommand extends Command {
       + `**[Akairo](https://github.com/1Computer1/discord-akairo)**: ${akairo}\n`,
     );
 
-    return await message.channel.send(embed);
+    return message.channel.send(embed);
   }
 }

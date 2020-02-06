@@ -38,7 +38,7 @@ export default class GitHubCommand extends Command {
     });
   }
 
-  public *args() {
+  public* args() {
     const method = yield {
       type: [
         ['github-user', 'user', 'u'],

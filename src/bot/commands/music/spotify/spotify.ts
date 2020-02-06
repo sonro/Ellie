@@ -44,7 +44,7 @@ export default class SpotifyCommand extends Command {
     });
   }
 
-  public *args() {
+  public* args() {
     const method = yield {
       type: [
         ['spotify-artist', 'artist'],

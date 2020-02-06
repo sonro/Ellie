@@ -21,8 +21,8 @@
 import { Message, MessageEmbed } from 'discord.js';
 
 import { Command } from 'discord-akairo';
-import Constants from '../../utils/Constants';
 import moment from 'moment';
+import Constants from '../../utils/Constants';
 
 export default class GuildCommand extends Command {
   public constructor() {
@@ -43,63 +43,64 @@ export default class GuildCommand extends Command {
   }
 
   public async exec(message: Message) {
-
     if (message.guild!.available) {
-      const GUILD_EMBED = new MessageEmbed();
-      const GUILD_NAME = message.guild!.name;
-      const GUILD_ID = message.guild!.id;
-      const GUILD_OWNER = message.guild!.owner!.user.tag;
-      const GUILD_MEMBERS = message.guild!.members.size;
-      const GUILD_ICON_URL = message.guild!.iconURL() as string;
-      const GUILD_MEMBERS_USERS = message.guild!.members.filter(m => m.user.bot).size;
-      const GUILD_MEMBERS_BOTS = message.guild!.members.filter(m => m.user.bot).size;
-      const GUILD_PRESENCES = message.guild!.presences.size;
-      const GUILD_PRESENCES_USERS = message.guild!.presences.filter(p => !p.user!.bot).size;
-      const GUILD_PRESENCES_BOTS = message.guild!.presences.filter(p => p.user!.bot).size;
-      const GUILD_CHANNELS = message.guild!.channels.filter(c => c.type !== 'category').size;
-      const GUILD_CHANNELS_TEXT = message.guild!.channels.filter(c => c.type === 'text').size;
-      const GUILD_CHANNELS_VOICE = message.guild!.channels.filter(c => c.type === 'voice').size;
-      const GUILD_ROLES = message.guild!.roles.filter(r => r.name !== '@everyone').map((r) => { return r.name; }).join(', ');
-      const GUILD_ROLES_COUNT = message.guild!.roles.filter(r => r.name !== '@everyone').size;
-      const GUILD_ROLES_HIGHEST = message.guild!.roles.highest;
-      const GUILD_EMOJIS = message.guild!.emojis.size || 'No emojis.';
-      const GUILD_EMOJIS_NORMAL = message.guild!.emojis.filter(e => !e.animated).size;
-      const GUILD_EMOJIS_ANIMATED = message.guild!.emojis.filter(e => e.animated).size;
-      const GUILD_CREATION_DATE = moment.utc(message.guild!.createdAt).format(Constants.DATE_FORMAT);
-      const GUILD_SERVER_REGION = message.guild!.region ? Constants.GUILD_REGIONS[message.guild!.region] : message.guild!.region;
-      const GUILD_VERIFICATION_LEVEL = Constants.GUILD_VERIFICATION_LEVELS[message.guild!.verificationLevel];
-      const GUILD_EXPLICIT_FILTER = Constants.GUILD_EXPLICIT_FILTER[message.guild!.explicitContentFilter];
-      const GUILD_VERIFIED_STATUS = message.guild!.verified ? 'Yes' : 'No';
+      const embed = new MessageEmbed();
+      const { name } = message.guild!;
+      const { id } = message.guild!;
+      const owner = message.guild!.owner!.user.tag;
+      const members = message.guild!.members.size;
+      const icon = message.guild!.iconURL() as string;
+      const users = message.guild!.members.filter((m) => !m.user.bot).size;
+      const bots = message.guild!.members.filter((m) => m.user.bot).size;
+      const totalPresencces = message.guild!.presences.size;
+      const userPresences = message.guild!.presences.filter((p) => !p.user!.bot).size;
+      const botPresences = message.guild!.presences.filter((p) => p.user!.bot).size;
+      const channels = message.guild!.channels.filter((c) => c.type !== 'category').size;
+      const textChannels = message.guild!.channels.filter((c) => c.type === 'text').size;
+      const voiceChannels = message.guild!.channels.filter((c) => c.type === 'voice').size;
+      const roles = message.guild!.roles.filter((r) => r.name !== '@everyone').map((r) => r.name).join(', ');
+      const roleCount = message.guild!.roles.filter((r) => r.name !== '@everyone').size;
+      const highestRole = message.guild!.roles.highest;
+      const emojis = message.guild!.emojis.size || 'No emojis.';
+      const normalEmojis = message.guild!.emojis.filter((e) => !e.animated).size;
+      const animatedEmojis = message.guild!.emojis.filter((e) => e.animated).size;
+      const created = moment.utc(message.guild!.createdAt).format(Constants.DATE_FORMAT);
+      const region = message.guild!.region ? Constants.GUILD_REGIONS[message.guild!.region] : message.guild!.region;
+      const verificationLevel = Constants.GUILD_VERIFICATION_LEVELS[message.guild!.verificationLevel];
+      const explicitFilter = Constants.GUILD_EXPLICIT_FILTER[message.guild!.explicitContentFilter];
+      const verifiedStatus = message.guild!.verified ? 'Yes' : 'No';
 
       // Guild Nitro Boost Information
-      const GUILD_BOOST_TIER = Constants.GUILD_TIERS[message.guild!.premiumTier];
-      const GUILD_BOOST_COUNT = message.guild!.premiumSubscriptionCount;
+      const boostTier = Constants.GUILD_TIERS[message.guild!.premiumTier];
+      const boostCount = message.guild!.premiumSubscriptionCount;
 
-      GUILD_EMBED.setTitle(`Information on guild ${GUILD_NAME}`);
-      GUILD_EMBED.setThumbnail(GUILD_ICON_URL);
-      GUILD_EMBED.setColor(GUILD_ROLES_HIGHEST.hexColor);
-      GUILD_EMBED.setDescription(
-        `**Name**: ${GUILD_NAME}\n` +
-        `**Owner**: ${GUILD_OWNER}\n` +
-        `**Members**: ${GUILD_MEMBERS} (${GUILD_MEMBERS_USERS} users, ${GUILD_MEMBERS_BOTS} bots)\n` +
-        `**Members Online**: ${GUILD_PRESENCES} (${GUILD_PRESENCES_USERS} users, ${GUILD_PRESENCES_BOTS} bots)\n` +
-        `**Channels**: ${GUILD_CHANNELS} (${GUILD_CHANNELS_TEXT} text, ${GUILD_CHANNELS_VOICE} voice)\n` +
-        `**Emojis**: ${GUILD_EMOJIS} (${GUILD_EMOJIS_NORMAL} normal, ${GUILD_EMOJIS_ANIMATED} animated)\n` +
-        `**Region**: ${GUILD_SERVER_REGION}\n` +
-        `**Creation Date**: ${GUILD_CREATION_DATE}\n` +
-        `**Verification Level**: ${GUILD_VERIFICATION_LEVEL}\n` +
-        `**Explicit Content Filter**: ${GUILD_EXPLICIT_FILTER}\n` +
-        `**Verified Server?** ${GUILD_VERIFIED_STATUS}\n` +
-        `**Roles (${GUILD_ROLES_COUNT})**: ${GUILD_ROLES}\n\n` +
-        '**__Nitro Boost Information__**:\n' +
-        `**Boosting Tier**: ${GUILD_BOOST_TIER}\n` +
-        `**Users Boosting**: ${GUILD_BOOST_COUNT}`,
+      embed.setTitle(`Information on guild ${name}`);
+      embed.setThumbnail(icon);
+      embed.setColor(highestRole.hexColor);
+      embed.setDescription(
+        `**Name**: ${name}\n`
+        + `**Owner**: ${owner}\n`
+        + `**Members**: ${members} (${users} users, ${bots} bots)\n`
+        + `**Members Online**: ${totalPresencces} (${userPresences} users, ${botPresences} bots)\n`
+        + `**Channels**: ${channels} (${textChannels} text, ${voiceChannels} voice)\n`
+        + `**Emojis**: ${emojis} (${normalEmojis} normal, ${animatedEmojis} animated)\n`
+        + `**Region**: ${region}\n`
+        + `**Creation Date**: ${created}\n`
+        + `**Verification Level**: ${verificationLevel}\n`
+        + `**Explicit Content Filter**: ${explicitFilter}\n`
+        + `**Verified Server?** ${verifiedStatus}\n`
+        + `**Roles (${roleCount})**: ${roles}\n\n`
+        + '**__Nitro Boost Information__**:\n'
+        + `**Boosting Tier**: ${boostTier}\n`
+        + `**Users Boosting**: ${boostCount}`,
       );
-      GUILD_EMBED.setFooter(`The ID belonging to ${GUILD_NAME} is ${GUILD_ID}.`);
 
-      message.channel.send(GUILD_EMBED);
+      embed.setFooter(`${name} guild ID: ${id}`);
+
+      await message.channel.send(embed);
     } else {
-      return message.channel.send('Guild not currently available, try again later.');
+      this.client.logger.error('Guild not currently available...');
+      message.author.dmChannel.send('This guild is not currently available, try again later.');
     }
   }
 }

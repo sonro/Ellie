@@ -29,6 +29,7 @@ const config = Config.loadConfig();
  * the configuration and setting basic options.
  *
  */
+// eslint-disable-next-line import/prefer-default-export
 export const client = new EllieClient(config, {
   ownerID: config.owner,
   disableEveryone: true,
@@ -38,5 +39,5 @@ export const client = new EllieClient(config, {
 /**
  * Login to Discord using the API token, and then
  * start the bot.
-*/
+ */
 client.loginToDiscord(config.token);

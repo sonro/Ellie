@@ -20,11 +20,11 @@
 
 import * as request from 'superagent';
 
-import { client } from '../../ellie';
 import moment from 'moment';
 import { stringify } from 'querystring';
+import { client } from '../../ellie';
 
-export class Util {
+export default {
 
   /**
    * The Shorten utility function.
@@ -38,9 +38,9 @@ export class Util {
    * @param {number} limit The amount of characters to limit the content to.
    * @returns {string} The shortened content.
    */
-  public static shorten(content: string, limit: number): string {
+  shorten(content: string, limit: number): string {
     return content.length > limit ? `${content.substring(0, limit - 3)}...` : content;
-  }
+  },
 
   /**
    * The getCoordinates function.
@@ -49,7 +49,7 @@ export class Util {
    *
    * @param location The location to get coordinates for.
    */
-  public static async getCoordinates(location: string) {
+  async getCoordinates(location: string) {
     const gmapsGeocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 
     const gmapsRequest = await request.get(`${gmapsGeocodeUrl}?${stringify({
@@ -64,7 +64,7 @@ export class Util {
       lat: coordinates.results[0].geometry.location.lat,
       long: coordinates.results[0].geometry.location.lng,
     };
-  }
+  },
 
   /**
    * The convertToFahrenheit function.
@@ -74,9 +74,9 @@ export class Util {
    * @param {number} temperature The temperature to convert to Fahrenheit.
    * @returns {number} The temperature in Fahrenheit.
    */
-  public static convertToFahrenheit(temperature: number): number {
+  convertToFahrenheit(temperature: number): number {
     return temperature * 1.8 + 32;
-  }
+  },
 
   /**
    * The format utility function.
@@ -88,9 +88,9 @@ export class Util {
    * @param args The arguments to send.
    * @returns {string} The formatted String.
    */
-  public static format(string: string, ...args: string[]): string {
+  format(string: string, ...args: string[]): string {
     return args.reduce((str, val) => str.replace(/%s|%v|%d|%f|%d/, val), string);
-  }
+  },
 
   /**
    * The parseNodeVersion utility function.
@@ -108,11 +108,10 @@ export class Util {
    * @returns {string} The parsed node.js version if fed process.version, nothing
    * if not fed process.version.
    */
-  public static parseNodeVersion(version: string): string {
-
+  parseNodeVersion(version: string): string {
     if (version !== process.version) {
-      client.logger.error('parseNodeVersion() should not be used for parsing non-Node.js ' +
-        'version strings!');
+      client.logger.error('parseNodeVersion() should not be used for parsing non-Node.js '
+        + 'version strings!');
       return '';
     }
 
@@ -133,7 +132,7 @@ export class Util {
     }
 
     return version.substring(0, 8).replace('v', '').concat(' (stable build)');
-  }
+  },
 
   /**
    * The convertToTitleCase utility function.
@@ -143,15 +142,14 @@ export class Util {
    * @param {string} string The string to convert to Title Case.
    * @returns {string} The string in Title Case.
    */
-  public static convertToTitleCase(string: string): string {
+  convertToTitleCase(string: string): string {
     const wordSeparators = /([ :–—-])/;
     const str = string.toLowerCase().split(wordSeparators);
 
-    for (let i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i += 1) {
       str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
     }
 
     return str.join(' ');
-  }
-
-}
+  },
+};

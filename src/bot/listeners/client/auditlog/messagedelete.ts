@@ -21,9 +21,9 @@
 
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import Constants from '../../../utils/Constants';
 import { Listener } from 'discord-akairo';
 import moment from 'moment';
+import Constants from '../../../utils/Constants';
 
 export default class MessageDeleteListener extends Listener {
   public constructor() {
@@ -35,8 +35,8 @@ export default class MessageDeleteListener extends Listener {
   }
 
   async exec(message: Message) {
-    const LOG_EMBED = new MessageEmbed();
-    const LOG_CHANNEL = message.guild!.channels.find(channel => channel.name === 'mod-logs') as TextChannel;
+    const logEmbed = new MessageEmbed();
+    const LOG_CHANNEL = message.guild!.channels.find((channel) => channel.name === 'mod-logs') as TextChannel;
 
     /** Do not log to channel if channel doesn't exist */
     if (typeof LOG_CHANNEL === 'undefined') {
@@ -52,21 +52,21 @@ export default class MessageDeleteListener extends Listener {
       return null;
     }
 
-    LOG_EMBED.setTitle('Message deleted!');
-    LOG_EMBED.setColor(message.member!.displayHexColor);
-    LOG_EMBED.setDescription(
-      'Looks like a message was deleted...\n\n' +
-      `**Channel of Origin**: ${message.channel}\n` +
-      `**Message Author**: ${message.author} (${message.author!.id})\n` +
-      `**Message Contents**: ${message.content}`,
+    logEmbed.setTitle('Message deleted!');
+    logEmbed.setColor(message.member!.displayHexColor);
+    logEmbed.setDescription(
+      'Looks like a message was deleted...\n\n'
+      + `**Channel of Origin**: ${message.channel}\n`
+      + `**Message Author**: ${message.author} (${message.author!.id})\n`
+      + `**Message Contents**: ${message.content}`,
     );
 
-    LOG_EMBED.setFooter(
+    logEmbed.setFooter(
       `Message created: ${moment
         .utc(message.createdTimestamp)
         .format(Constants.DATE_FORMAT)} (UTC)`,
     );
 
-    LOG_CHANNEL.send(LOG_EMBED);
+    return LOG_CHANNEL.send(logEmbed);
   }
 }

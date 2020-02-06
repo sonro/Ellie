@@ -67,12 +67,14 @@ export default class PurgeCommand extends Command {
       const messages = await message.channel.messages.fetch({ limit: count + 1 });
       await message.channel.bulkDelete(messages, true);
       await message.channel.send(`Deleting ${messageCount}, please wait...`).then((res) => {
-        (res as Message).edit(`Deleted ${messageCount}.`).then(res => res.delete({ timeout: 15000 }));
+        (res as Message).edit(`Deleted ${messageCount}.`).then((resp) => resp.delete({ timeout: 15000 }));
       });
       this.client.logger.info(`Deleted ${messageCount} from #${channel.name} in the guild ${message.guild}.`);
     } catch (err) {
       this.client.logger.error(`Unable to delete messages!\n\n${err}`);
-      message.channel.send(`Sorry, I was unable to delete any messages!\n\`\`\`${err}\`\`\``);
+      return message.channel.send(`Sorry, I was unable to delete any messages!\n\`\`\`${err}\`\`\``);
     }
+
+    return null;
   }
 }

@@ -37,9 +37,9 @@ export default class ChangelogCommand extends Command {
 
   public async exec(message: Message) {
     const embed = new MessageEmbed();
-    const token = this.client.config.github.token;
+    const { token } = this.client.config.github;
     const owner = this.client.config.github.repo_owner;
-    const name  = this.client.config.github.repo_name;
+    const name = this.client.config.github.repo_name;
     const query = `query commits($owner: String!, $repo: String!) {
       repository(owner: $owner, name: $repo) {
         url
@@ -72,8 +72,8 @@ export default class ChangelogCommand extends Command {
       },
     });
 
-    const target = result.repository.defaultBranchRef.target;
-    const url = result.repository.url;
+    const { target } = result.repository.defaultBranchRef;
+    const { url } = result.repository;
     const branch = result.repository.defaultBranchRef.name;
     const commits = target.history.edges.map((c: any) => {
       const commit = c.node;

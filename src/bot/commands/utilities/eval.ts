@@ -38,7 +38,7 @@ export default class EvalCommand extends Command {
     });
   }
 
-  public async exec(message: Message) {
+  public static async exec(message: Message) {
     return message.channel.send('Work in progress; not implemented yet.');
   }
 }

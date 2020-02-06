@@ -23,7 +23,7 @@ import * as request from 'superagent';
 import { Message, MessageEmbed } from 'discord.js';
 
 import { Command } from 'discord-akairo';
-import { Util } from '../../../utils/Util';
+import Util from '../../../utils/Util';
 
 export default class WikipediaCommand extends Command {
   public constructor() {
@@ -52,13 +52,12 @@ export default class WikipediaCommand extends Command {
 
   public async exec(message: Message, { query, lang }: { query: string, lang: string }) {
     if (!query) {
-      return message.channel.send('You didn\'t enter an article name to search for! Please try again.',
-      );
+      return message.channel.send('You didn\'t enter an article name to search for! Please try again.');
     }
 
     try {
       const W_URL = `https://${lang}.wikipedia.org/`;
-      const W_API = W_URL + '/w/api.php';
+      const W_API = `${W_URL}/w/api.php`;
       const W_LOGO = 'https://i.imgur.com/Z7NJBK2.png';
       const W_REQUEST = await request.get(W_API).query({
         action: 'query',
@@ -76,14 +75,13 @@ export default class WikipediaCommand extends Command {
       const W_ARTICLE = W_REQUEST.body.query.pages[0];
 
       if (W_ARTICLE.missing) {
-        return message.channel.send(`The article with the name of ${query} could not be found. ` +
-          'Please try a different article name.',
-        );
+        return message.channel.send(`The article with the name of ${query} could not be found. `
+          + 'Please try a different article name.');
       }
 
       if (query.includes('Main Page') || query.includes('Special:')) {
-        return message.channel.send('I am unable to display the Main Page or pages labeled under ' +
-          '`Special:`. Please try a different article/page.');
+        return message.channel.send('I am unable to display the Main Page or pages labeled under '
+          + '`Special:`. Please try a different article/page.');
       }
 
       const ARTICLE_NAME = W_ARTICLE.title;
@@ -98,9 +96,9 @@ export default class WikipediaCommand extends Command {
       W_EMBED.setDescription(Util.shorten(ARTICLE_DESC, 1985));
       W_EMBED.setFooter(`Page content for ${ARTICLE_NAME} is licensed under CC-BY-SA 3.0.`);
 
-      message.channel.send(W_EMBED);
+      return message.channel.send(W_EMBED);
     } catch (err) {
-      console.log(err);
+      return this.client.logger.error(err);
     }
   }
 }

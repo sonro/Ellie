@@ -51,15 +51,14 @@ export default class HelpCommand extends Command {
       embed.setColor(0xFF4922);
       embed.setThumbnail(this.client.user!.displayAvatarURL({ format: 'png', size: 1024 }));
       embed.setDescription(
-        'This is a list of all commands available to Ellie. For information on a specific command, ' +
-        `please type **${prefix}help <command>**.`);
+        'This is a list of all commands available to Ellie. For information on a specific command, '
+        + `please type **${prefix}help <command>**.`,
+      );
       embed.setFooter(`${this.handler.modules.size} commands/subcommands`);
 
-      for (const category of this.handler.categories.values()) {
-        embed.addField(`❯ ${category.id}`, `${category.filter(
-          c => c.aliases.length > 0).map((c: Command) => `\`${c.aliases[0]}\``).join(' ')}`,
-        );
-      }
+      this.handler.categories.map((category) => embed.addField(`❯ ${category.id}`, `${category.filter(
+        (c) => c.aliases.length > 0,
+      ).map((c: Command) => `\`${c.aliases[0]}\``).join(' ')}`));
 
       return message.channel.send(embed);
     }
@@ -85,12 +84,12 @@ export default class HelpCommand extends Command {
       .setThumbnail(this.client.user!.displayAvatarURL({ format: 'png', size: 1024 }))
       .setTitle(`Help information for command ${command.aliases[0]}`)
       .setDescription(
-        `${command.description.content || '\u200b'}\n\n` +
-        `${getAliases()}\n` +
-        `**Category**: ${command.category}\n` +
-        `**Usage**: ${prefix}${command.aliases[0]} ${command.description.usage ? command.description.usage : ''}\n` +
-        `**Permissions**: ${command.clientPermissions || 'No permissions necessary.'}\n` +
-        `**Examples**: \n${examples}`,
+        `${command.description.content || '\u200b'}\n\n`
+        + `${getAliases()}\n`
+        + `**Category**: ${command.category}\n`
+        + `**Usage**: ${prefix}${command.aliases[0]} ${command.description.usage ? command.description.usage : ''}\n`
+        + `**Permissions**: ${command.clientPermissions || 'No permissions necessary.'}\n`
+        + `**Examples**: \n${examples}`,
       );
     return message.channel.send(embed);
   }

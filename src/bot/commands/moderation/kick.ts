@@ -46,7 +46,6 @@ export default class KickCommand extends Command {
   }
 
   public async exec(message: Message, { member, reason }: { member: GuildMember, reason: string }) {
-
     if (message.channel.type === 'dm') {
       return message.channel.send('This command cannot be used in direct messages.');
     }
@@ -66,17 +65,17 @@ export default class KickCommand extends Command {
       KICK_EMBED.setColor(member.displayHexColor);
       KICK_EMBED.setThumbnail(member.user.displayAvatarURL());
       KICK_EMBED.setDescription(
-        `**Guild**: ${member.guild.name}\n` +
-        `**Member**: ${member.user.tag}\n` +
-        `**Reason**: ${reason}`,
+        `**Guild**: ${member.guild.name}\n`
+        + `**Member**: ${member.user.tag}\n`
+        + `**Reason**: ${reason}`,
       );
 
       message.channel.send(KICK_EMBED);
-
     }).catch((err) => {
       message.channel.send(`I was unable to kick member **${member.user.tag}**.`);
-      this.client.logger.error(err);
+      return this.client.logger.error(err);
     });
 
+    return null;
   }
 }

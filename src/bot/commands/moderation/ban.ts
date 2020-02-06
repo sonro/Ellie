@@ -53,8 +53,11 @@ export default class BanCommand extends Command {
     });
   }
 
-  public async exec(message: Message, { member, days, reason }: { member: GuildMember, days: number, reason: string }) {
-
+  public async exec(message: Message, {
+    member,
+    days,
+    reason,
+  }: { member: GuildMember, days: number, reason: string }) {
     if (message.channel.type === 'dm') {
       return message.channel.send('This command cannot be used in direct messages.');
     }
@@ -74,24 +77,24 @@ export default class BanCommand extends Command {
       BAN_EMBED.setColor(member.displayHexColor);
       BAN_EMBED.setThumbnail(member.user.displayAvatarURL());
       BAN_EMBED.setDescription(
-        `**Guild**: ${member.guild.name}\n` +
-        `**Member**: ${member.user.tag}\n` +
-        `**Duration**: ${days} days\n` +
-        `**Reason**: ${reason}`,
+        `**Guild**: ${member.guild.name}\n`
+        + `**Member**: ${member.user.tag}\n`
+        + `**Duration**: ${days} days\n`
+        + `**Reason**: ${reason}`,
       );
 
       message.channel.send(BAN_EMBED);
-
     }).catch((err) => {
-
       if (err.code === 50013) {
-        return message.channel.send('Sorry, it looks like I am missing the proper permissions ' +
-          `so I cannot ban **${member.user.tag}**. Please make sure I have the right permissions ` +
-          'and then try again. Also, make sure my role is at the top of the role list!');
+        return message.channel.send('Sorry, it looks like I am missing the proper permissions '
+          + `so I cannot ban **${member.user.tag}**. Please make sure I have the right permissions `
+          + 'and then try again. Also, make sure my role is at the top of the role list!');
       }
 
       this.client.logger.error(err);
       return message.channel.send(`I was unable to ban member **${member.user.tag}**.`);
     });
+
+    return null;
   }
 }

@@ -21,8 +21,8 @@
 import { Message, MessageEmbed, GuildMember } from 'discord.js';
 
 import { Command } from 'discord-akairo';
-import Constants from '../../utils/Constants';
 import moment from 'moment';
+import Constants from '../../utils/Constants';
 
 export default class UserCommand extends Command {
   public constructor() {
@@ -45,59 +45,80 @@ export default class UserCommand extends Command {
   }
 
   public async exec(message: Message, { member }: { member: GuildMember }) {
-
     if (message.channel.type === 'dm') {
       return message.channel.send('This command cannot be used in direct messages!');
     }
 
-    const USER_EMBED = new MessageEmbed();
-    const ACCOUNT_CREATION_DATE = moment.utc(member.user.createdAt).format(Constants.DATE_FORMAT);
-    const ACCOUNT_ID = member.id;
-    const ACCOUNT_TAG = member.user.tag;
-    const ACCOUNT_TYPE = member.user.bot ? 'Bot' : 'User';
-    const ACCOUNT_PRESENCE = member.user.presence.activity
-      ? `, ${Constants.ACTIVITY_NAMES[member.user.presence.activity.type]} **${member.user.presence.activity.name}**`
-      : '';
-    const GUILD_ACCOUNT_JOIN_DATE = moment.utc(member.joinedAt!).format(Constants.DATE_FORMAT);
-    const GUILD_ACCCOUNT_COLOR = member.displayHexColor;
-    const GUILD_ACCOUNT_NICK = member.nickname || 'No nickname.';
-    const GUILD_MAIN_ROLE = member.roles.hoist ? member.roles.hoist.name : 'No main role.';
-    const GUILD_ROLES = member.roles.filter(r => r.name !== '@everyone').map(r => r.name).join(' | ') || 'No roles.';
-    const GUILD_ROLE_COUNT = member.roles.filter(r => r !== message.guild!.roles[0]).size;
+    const embed = new MessageEmbed();
+    const created = moment.utc(member.user.createdAt).format(Constants.DATE_FORMAT);
+    const { id } = member;
+    const { tag } = member.user;
+    const type = member.user.bot ? 'Bot' : 'User';
 
-    let ACCOUNT_STATUS: string;
-    if (member.user.presence.status === 'online') {
-      ACCOUNT_STATUS = 'Online';
-    } else if (member.user.presence.status === 'idle') {
-      ACCOUNT_STATUS = 'Idle';
-    } else if (member.user.presence.status === 'dnd') {
-      ACCOUNT_STATUS = 'Do Not Disturb';
-    } else {
-      if (member.user.bot) {
-        ACCOUNT_STATUS = 'Unavailable';
-      } else {
-        ACCOUNT_STATUS = 'Offline';
+    // eslint-disable-next-line array-callback-return
+    const activities = member.user.presence.activities.filter((a) => a.type === 'CUSTOM_STATUS').map((a) => {
+      if (a.type === 'LISTENING') {
+        if (a.name === 'Spotify') {
+          // const { assets } = a;
+          // const song = a.details;
+          const artists = a.state;
+          // const album = a.assets?.largeText;
+          // const uri = a.syncID;
+
+          if (artists?.includes(';')) {
+            const replacer = artists.replace(';', ',');
+            const commas = replacer.match(',')?.length as number;
+
+            if (commas >= 2) {
+              artists.replace(/,([^,]*)$/, ', &');
+            } else {
+              artists.replace(/,([^,]*)$/, '&');
+            }
+
+            this.client.logger.info(artists);
+          }
+        }
       }
+    });
+
+    const joined = moment.utc(member.joinedAt!).format(Constants.DATE_FORMAT);
+    const color = member.displayHexColor;
+    const nickname = member.nickname || 'No nickname.';
+    const role = member.roles.hoist ? member.roles.hoist.name : 'No main role.';
+    const roles = member.roles.filter((r) => r.name !== '@everyone').map((r) => r.name).join(' | ') || 'No roles.';
+    const roleCount = member.roles.filter((r) => r.name !== '@everyone').size;
+
+    let status: string;
+    if (member.user.presence.status === 'online') {
+      status = 'Online';
+    } else if (member.user.presence.status === 'idle') {
+      status = 'Idle';
+    } else if (member.user.presence.status === 'dnd') {
+      status = 'Do Not Disturb';
+    } else if (member.user.bot) {
+      status = 'Unavailable';
+    } else {
+      status = 'Offline';
     }
 
-    USER_EMBED.setTitle(`Information on user ${member.user.username}`);
-    USER_EMBED.setThumbnail(member.user.displayAvatarURL());
-    USER_EMBED.setColor(GUILD_ACCCOUNT_COLOR);
-    USER_EMBED.setDescription(
-      '**__General__**:\n' +
-      `**Status**: ${ACCOUNT_STATUS}${ACCOUNT_PRESENCE}\n` +
-      `**Type**: ${ACCOUNT_TYPE}\n` +
-      `**Tag**: ${ACCOUNT_TAG}\n` +
-      `**ID**: ${ACCOUNT_ID}\n` +
-      `**Creation Date**: ${ACCOUNT_CREATION_DATE}\n\n` +
-      '**__Guild-specific Info__**:\n' +
-      `**Joined**: ${GUILD_ACCOUNT_JOIN_DATE}\n` +
-      `**Nickname**: ${GUILD_ACCOUNT_NICK}\n` +
-      `**Display Color**: ${GUILD_ACCCOUNT_COLOR}\n` +
-      `**Main Role**: ${GUILD_MAIN_ROLE}\n` +
-      `**Roles (${GUILD_ROLE_COUNT})**: ${GUILD_ROLES}\n`,
+    embed.setTitle(`Information on user ${member.user.username}`);
+    embed.setThumbnail(member.user.displayAvatarURL());
+    embed.setColor(color);
+    embed.setDescription(
+      '**__General__**:\n'
+      + `**Status**: ${status}${activities}\n`
+      + `**Type**: ${type}\n`
+      + `**Tag**: ${tag}\n`
+      + `**ID**: ${id}\n`
+      + `**Creation Date**: ${created}\n\n`
+      + '**__Guild-specific Info__**:\n'
+      + `**Joined**: ${joined}\n`
+      + `**Nickname**: ${nickname}\n`
+      + `**Display Color**: ${color}\n`
+      + `**Main Role**: ${role}\n`
+      + `**Roles (${roleCount})**: ${roles}\n`,
     );
 
-    return message.channel.send(USER_EMBED);
+    return message.channel.send(embed);
   }
 }

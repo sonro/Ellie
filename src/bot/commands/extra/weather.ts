@@ -19,10 +19,10 @@
 
 import { Message, MessageEmbed } from 'discord.js';
 import { Command } from 'discord-akairo';
-import { Util } from '../../utils/Util';
 import moment from 'moment';
 import { stringify } from 'querystring';
 import * as request from 'superagent';
+import Util from '../../utils/Util';
 
 export default class WeatherCommand extends Command {
   public constructor() {
@@ -44,18 +44,17 @@ export default class WeatherCommand extends Command {
   }
 
   public async exec(message: Message, args: { location: string }) {
-
     if (!args.location) {
-      return message.channel.send('You didn\'t enter a location name! Please enter one and ' +
-        'then try again.');
+      return message.channel.send('You didn\'t enter a location name! Please enter one and '
+        + 'then try again.');
     }
 
     const locationCoordinates = await Util.getCoordinates(args.location);
     const darkSkyApiUrl = 'https://api.darksky.net/forecast';
     const darkSkyApiKey = this.client.config.darksky.key;
     const { body: weather } = await request.get(
-      `${darkSkyApiUrl}/${darkSkyApiKey}/` +
-      `${locationCoordinates.lat},${locationCoordinates.long}?${stringify({
+      `${darkSkyApiUrl}/${darkSkyApiKey}/`
+      + `${locationCoordinates.lat},${locationCoordinates.long}?${stringify({
         units: 'si',
       })}`,
     );
@@ -86,19 +85,19 @@ export default class WeatherCommand extends Command {
 
     /** Set the embed description. Contains all the weather information. */
     darkSkyEmbed.setDescription(
-      `${darkSkySummary}\n\n` +
-      '**__General Forecast__**:\n' +
-      `**Condition**: ${darkSkyCondition}\n` +
-      `**Currently**: ${darkSkyTemp} °C | ${darkSkyTempFahren} °F\n` +
-      `**Today's High**: ${darkSkyTodayHigh} °C | ${darkSkyTodayHighFahren} °F\n` +
-      `**Today's Low**: ${darkSkyTodayLow} °C | ${darkSkyTodayLowFahren} °F\n\n` +
-      '**__Detailed Forecast Info__**:\n' +
-      `**Wind Speed**: ${darkSkyWindSpeed} km/h\n` +
-      `**Pressure**: ${darkSkyPresure} hPa\n` +
-      `**Dew Point**: ${darkSkyDewPoint} °C\n` +
-      `**Humidity**: ${darkSkyHumidity}%\n` +
-      `**Sunrise**: ${moment(darkSkySunrise).format('h:mm a')}\n` +
-      `**Sunset**: ${moment(darkSkySunset).format('h:mm a')}\n`,
+      `${darkSkySummary}\n\n`
+      + '**__General Forecast__**:\n'
+      + `**Condition**: ${darkSkyCondition}\n`
+      + `**Currently**: ${darkSkyTemp} °C | ${darkSkyTempFahren} °F\n`
+      + `**Today's High**: ${darkSkyTodayHigh} °C | ${darkSkyTodayHighFahren} °F\n`
+      + `**Today's Low**: ${darkSkyTodayLow} °C | ${darkSkyTodayLowFahren} °F\n\n`
+      + '**__Detailed Forecast Info__**:\n'
+      + `**Wind Speed**: ${darkSkyWindSpeed} km/h\n`
+      + `**Pressure**: ${darkSkyPresure} hPa\n`
+      + `**Dew Point**: ${darkSkyDewPoint} °C\n`
+      + `**Humidity**: ${darkSkyHumidity}%\n`
+      + `**Sunrise**: ${moment(darkSkySunrise).format('h:mm a')}\n`
+      + `**Sunset**: ${moment(darkSkySunset).format('h:mm a')}\n`,
     );
 
     /** Set the embed footer. */
@@ -106,7 +105,6 @@ export default class WeatherCommand extends Command {
     darkSkyEmbed.setTimestamp();
 
     /** Send the weather embed. */
-    message.channel.send(darkSkyEmbed);
-
+    return message.channel.send(darkSkyEmbed);
   }
 }

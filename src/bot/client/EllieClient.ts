@@ -19,13 +19,15 @@
 
 import * as path from 'path';
 
-import { AkairoClient, AkairoOptions, CommandHandler, ListenerHandler } from 'discord-akairo';
+import {
+  AkairoClient, AkairoOptions, CommandHandler, ListenerHandler,
+} from 'discord-akairo';
 
 import { ClientOptions } from 'discord.js';
-import Config from './Config';
 import { Signale } from 'signale';
 import Spotify from 'spotify-web-api-node';
 import { Connection } from 'typeorm';
+import Config from './Config';
 import { version } from '../../../package.json';
 
 declare module 'discord-akairo' {
@@ -38,7 +40,6 @@ declare module 'discord-akairo' {
 }
 
 export default class EllieClient extends AkairoClient {
-
   /** Initialize the logging system. */
   public logger = new Signale();
 
@@ -127,7 +128,7 @@ export default class EllieClient extends AkairoClient {
     await this.start();
     await this.setup();
 
-    process.on('uncaughtException', error => this.logger.error(`Uncaught Exception: ${error}`));
+    process.on('uncaughtException', (error) => this.logger.error(`Uncaught Exception: ${error}`));
 
     return this.login(token);
   }

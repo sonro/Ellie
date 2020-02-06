@@ -22,9 +22,9 @@ import * as request from 'superagent';
 import { Command } from 'discord-akairo';
 import { Message, MessageEmbed } from 'discord.js';
 
-import { Util } from '../../../utils/Util';
-
 import stripHtml from 'string-strip-html';
+import Util from '../../../utils/Util';
+
 
 export default class SpotifyArtistCommand extends Command {
   public constructor() {
@@ -51,13 +51,12 @@ export default class SpotifyArtistCommand extends Command {
       embed.setColor(0x1DB954);
       embed.setTitle('Error: No artist name provided.');
       embed.setDescription('You didn\'t provide an artist name. Please provide one and then '
-        + 'try again!',
-      );
+        + 'try again!');
       return message.channel.send(embed);
     }
 
     this.client.spotify.clientCredentialsGrant().then((data) => {
-      this.client.spotify.setAccessToken(data.body['access_token']);
+      this.client.spotify.setAccessToken(data.body.access_token);
 
       // I really hate having to do this, but because Spotify for some unknown reason
       // decided to not expose artist biographies in their public API. As such, I have
@@ -68,20 +67,20 @@ export default class SpotifyArtistCommand extends Command {
       const endpoint = '/artists/';
       const url = backend + endpoint;
 
-      this.client.spotify.searchArtists(artist, { limit: 1, offset: 0 }, (err, res) => {
-        const id = res.body.artists.items[0].id;
+      this.client.spotify.searchArtists(artist, { limit: 1, offset: 0 }, (err, resp) => {
+        const { id } = resp.body.artists.items[0];
 
         this.client.spotify.getArtist(id).then(async (res) => {
           const embed = new MessageEmbed();
-          const agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-                        'Chrome/80.0.3987.0 Safari/537.36 Edg/80.0.361.0';
+          const agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                        + 'Chrome/80.0.3987.0 Safari/537.36 Edg/80.0.361.0';
           const tu = await request.get('https://open.spotify.com').set({ 'User-Agent': agent });
           const token = tu.header['set-cookie'][3].split('=')[1].split(';')[0];
 
-          const about = await request.get(url + id).set({ Authorization: 'Bearer ' + token, 'User-Agent': agent });
+          const about = await request.get(url + id).set({ Authorization: `Bearer ${token}`, 'User-Agent': agent });
 
           let biography: string;
-          const name = res.body.name;
+          const { name } = res.body;
           const genres = res.body.genres.join(', ');
           const link = res.body.external_urls.spotify;
           const image = res.body.images[0].url;
@@ -90,7 +89,7 @@ export default class SpotifyArtistCommand extends Command {
           const delta = about.body.artistInsights.monthly_listeners_delta;
           const position = about.body.artistInsights.global_chart_position;
 
-          if (about.body.hasOwnProperty('bio')) {
+          if (Object.prototype.hasOwnProperty.call(about.body, 'bio')) {
             biography = stripHtml(Util.shorten(about.body.bio, 1000));
           } else {
             biography = 'No biography available.';
@@ -101,16 +100,19 @@ export default class SpotifyArtistCommand extends Command {
           embed.setURL(link);
           embed.setThumbnail(image);
           embed.setDescription(
-            `${biography}\n\n` +
-            '**__Artist Stats__:**\n' +
-            `**Chart Position**: ${position}\n` +
-            `**Followers**: ${followers}\n` +
-            `**Listeners**: ${listeners ? listeners : `No users listen to ${name}.`} (${delta} delta)\n` +
-            `**Genres**: ${genres ? genres : 'No genres available.'}\n\n`);
+            `${biography}\n\n`
+            + '**__Artist Stats__:**\n'
+            + `**Chart Position**: ${position}\n`
+            + `**Followers**: ${followers}\n`
+            + `**Listeners**: ${listeners || `No users listen to ${name}.`} (${delta} delta)\n`
+            + `**Genres**: ${genres || 'No genres available.'}\n\n`,
+          );
 
           return message.channel.send(embed);
         });
       });
     });
+
+    return null;
   }
 }
